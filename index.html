@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemical Resistance Finder — Demo Template</title>
+<style>
+  :root{
+    --ink:#1a2b2e;
+    --paper:#f4f2ec;
+    --paper2:#eae6da;
+    --line:#c9c2ae;
+    --brand:#0f5c52;
+    --brand-deep:#0a3f38;
+    --accent:#c6551a;
+    --ok:#2f7a3d;
+    --ok-bg:#e3f1e1;
+    --bad:#a5312a;
+    --bad-bg:#f6e3e1;
+    --warn:#a3720f;
+    --warn-bg:#f5ecd4;
+    --info:#3a5f8a;
+    --info-bg:#e2ebf5;
+    --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+  }
+  @font-face{
+    font-family:'Fraunces';
+    src:local('Georgia');
+  }
+  header{
+    background:var(--brand-deep);
+    color:var(--paper);
+    padding:2.2rem 1.5rem 1.6rem;
+    position:relative;
+    overflow:hidden;
+  }
+  header::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(244,242,236,.05) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(0deg, rgba(244,242,236,.05) 0 1px, transparent 1px 64px);
+    pointer-events:none;
+  }
+  .header-inner{max-width:980px;margin:0 auto;position:relative;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:.72rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:#9fd6c8;
+    margin-bottom:.5rem;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:2rem;
+    margin:0 0 .4rem;
+    letter-spacing:-0.01em;
+  }
+  header p.sub{
+    margin:0;
+    color:#cfe4de;
+    font-size:.98rem;
+    max-width:620px;
+  }
+  main{max-width:980px;margin:0 auto;padding:1.6rem 1.5rem 4rem;}
+
+  .panel{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1.4rem 1.4rem 1.6rem;
+    margin-bottom:1.4rem;
+    box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  .panel h2{
+    font-family:var(--serif);
+    font-size:1.05rem;
+    margin:0 0 .9rem;
+    display:flex;
+    align-items:baseline;
+    gap:.5rem;
+  }
+  .step-num{
+    font-family:var(--mono);
+    font-size:.72rem;
+    color:var(--brand);
+    background:var(--ok-bg);
+    border:1px solid var(--brand);
+    border-radius:3px;
+    padding:.05rem .4rem;
+  }
+
+  .field{margin-bottom:1rem;}
+  .field label{
+    display:block;
+    font-size:.78rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#5b6b63;
+    margin-bottom:.35rem;
+  }
+  input[type=text], select{
+    width:100%;
+    padding:.6rem .7rem;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:.95rem;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+  }
+  #mediumInput{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23726b5a' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right .8rem center;
+    padding-right:2.2rem;
+    cursor:pointer;
+  }
+  input[type=text]:focus, select:focus{
+    outline:2px solid var(--brand);
+    outline-offset:1px;
+    background:#fff;
+  }
+  #mediumList{
+    position:relative;
+  }
+  .suggestions{
+    list-style:none;
+    margin:.3rem 0 0;
+    padding:0;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fff;
+    max-height:260px;
+    overflow-y:auto;
+    display:none;
+  }
+  .suggestions.open{display:block;}
+  .suggestions li{
+    padding:.55rem .75rem;
+    cursor:pointer;
+    font-size:.92rem;
+    border-bottom:1px solid #f0eee5;
+  }
+  .suggestions li:last-child{border-bottom:none;}
+  .suggestions li:hover, .suggestions li.active{
+    background:var(--ok-bg);
+  }
+  .suggestions li .formula{
+    color:#8a8371;
+    font-family:var(--mono);
+    font-size:.78rem;
+    margin-left:.4rem;
+  }
+
+  .variant-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(230px,1fr));
+    gap:.6rem;
+  }
+  .variant-card{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:.65rem .8rem;
+    cursor:pointer;
+    background:var(--paper);
+    transition:border-color .12s, background .12s;
+  }
+  .variant-card:hover{border-color:var(--brand);}
+  .variant-card.selected{
+    border-color:var(--brand);
+    background:var(--ok-bg);
+    box-shadow:0 0 0 1px var(--brand);
+  }
+  .variant-card .vc-title{font-weight:600;font-size:.9rem;margin-bottom:.25rem;}
+  .variant-card .vc-meta{
+    font-family:var(--mono);
+    font-size:.76rem;
+    color:#6b6b5e;
+    display:flex;
+    flex-wrap:wrap;
+    gap:.4rem;
+  }
+  .vc-meta span{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:.05rem .35rem;
+  }
+  .ex-tag{background:#fbe4d8 !important; border-color:var(--accent) !important; color:#8a3714;}
+
+  .group{margin-bottom:1.6rem;}
+  .group h3{
+    font-family:var(--serif);
+    font-size:1.15rem;
+    margin:0 0 .15rem;
+    color:var(--brand-deep);
+  }
+  .group .group-desc{
+    font-size:.82rem;
+    color:#6b6b5e;
+    margin:0 0 .7rem;
+  }
+  .mat-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(240px,1fr));
+    gap:.6rem;
+  }
+  .mat-card{
+    border-radius:8px;
+    padding:.7rem .8rem;
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .mat-card .mc-name{font-weight:600;font-size:.88rem;margin-bottom:.3rem;}
+  .mat-card .mc-status{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    font-family:var(--mono);
+    font-size:.76rem;
+    font-weight:600;
+    padding:.15rem .5rem;
+    border-radius:20px;
+  }
+  .mat-card .mc-note{
+    font-size:.78rem;
+    color:#5b5b4e;
+    margin-top:.4rem;
+    line-height:1.4;
+  }
+  .st-R{background:var(--ok-bg); border-color:var(--ok);}
+  .st-R .mc-status{background:var(--ok); color:#fff;}
+  .st-N{background:var(--bad-bg); border-color:var(--bad);}
+  .st-N .mc-status{background:var(--bad); color:#fff;}
+  .st-EPDM{background:var(--warn-bg); border-color:var(--warn);}
+  .st-EPDM .mc-status{background:var(--warn); color:#fff;}
+  .st-FPMFEP{background:var(--warn-bg); border-color:var(--warn);}
+  .st-FPMFEP .mc-status{background:var(--warn); color:#fff;}
+  .st-OnDemand{background:var(--info-bg); border-color:var(--info);}
+  .st-OnDemand .mc-status{background:var(--info); color:#fff;}
+  .st-Special{background:var(--info-bg); border-color:var(--info);}
+  .st-Special .mc-status{background:var(--info); color:#fff;}
+  .st-empty{background:#f3f2ec; border-color:var(--line); opacity:.6;}
+  .st-empty .mc-status{background:#b8b3a2; color:#fff;}
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem 1rem;
+    font-size:.78rem;
+    color:#5b5b4e;
+    margin-top:1rem;
+    padding-top:1rem;
+    border-top:1px dashed var(--line);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:.35rem;}
+  .dot{width:.6rem;height:.6rem;border-radius:50%;display:inline-block;}
+
+  .empty-state{
+    text-align:center;
+    padding:2.5rem 1rem;
+    color:#8a8371;
+    font-size:.92rem;
+  }
+  .empty-state .big{
+    font-family:var(--serif);
+    font-size:1.3rem;
+    color:var(--ink);
+    margin-bottom:.4rem;
+  }
+  footer{
+    text-align:center;
+    font-size:.75rem;
+    color:#8a8371;
+    padding:1rem;
+  }
+  .count-badge{
+    font-family:var(--mono);
+    font-size:.72rem;
+    color:#6b6b5e;
+    margin-left:.3rem;
+    font-weight:400;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="eyebrow">Demo Template · Sample Data Only</div>
+    <h1>Chemical Resistance Finder</h1>
+    <p class="sub">Select a chemical, narrow down by concentration/density/temperature class, and see which materials are suitable for pump tubes, flow meters and nozzles. <strong>All chemical data on this page is fictional/illustrative</strong> — built to demonstrate the tool, not to be used for real material selection.</p>
+  </div>
+</header>
+
+<main>
+
+  <section class="panel">
+    <h2><span class="step-num">1</span> Chemical</h2>
+    <div class="field" id="mediumList">
+      <label for="mediumInput">Search medium (name or formula)</label>
+      <input type="text" id="mediumInput" placeholder="e.g. Sulphuric Acid, Acetone, HNO3 …" autocomplete="off">
+      <ul class="suggestions" id="suggestions"></ul>
+    </div>
+  </section>
+
+  <section class="panel" id="variantPanel" style="display:none;">
+    <h2><span class="step-num">2</span> Concentration / Density / Temperature Class <span class="count-badge" id="variantCount"></span></h2>
+    <div class="variant-grid" id="variantGrid"></div>
+  </section>
+
+  <section id="resultsSection" style="display:none;">
+    <div class="panel">
+      <h2><span class="step-num">3</span> Suitable Materials</h2>
+      <div id="resultsGroups"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--ok)"></span> R — Resistant</span>
+        <span><span class="dot" style="background:var(--bad)"></span> N — Not resistant</span>
+        <span><span class="dot" style="background:var(--warn)"></span> EPDM / FPM‑FEP — Resistant, special seal required</span>
+        <span><span class="dot" style="background:var(--info)"></span> On request / special version</span>
+        <span><span class="dot" style="background:#b8b3a2"></span> No data</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="empty-state" id="emptyState">
+    <div class="big">No chemical selected yet</div>
+    Start by typing a chemical above.
+  </div>
+
+</main>
+
+<footer>Sample data for demo purposes only — not derived from any manufacturer's resistance chart.</footer>
+
+<script>
+const DATA = [{"no": 1, "medium": "Acetone", "formula": "CH3COCH3", "pct": "100", "sg": "0.79", "temp": "T1", "ex": "Ex", "mat": {"PP": "FPM-FEP", "PVDF": "R", "Aluminium": "EPDM", "Stainless Steel": "R", "Hastelloy C": "OnDemand", "PP (flow meter)": "R", "PVDF (flow meter)": "EPDM", "PPS": "R", "Stainless Steel (flow meter)": "OnDemand", "PP/FPM": "R", "PVDF/FPM": "N", "Brass/PTFE": "FPM-FEP", "Stainless/FPM": "N", "Aluminium/NBR": "R"}}, {"no": 2, "medium": "Ammonia Solution", "formula": "NH4OH", "pct": "10", "sg": "", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "OnDemand", "Aluminium": "R", "Stainless Steel": "N", "Hastelloy C": "R", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "EPDM", "Stainless Steel (flow meter)": "R", "PP/FPM": "N", "PVDF/FPM": "R", "Brass/PTFE": "FPM-FEP", "Stainless/FPM": "N", "Aluminium/NBR": "OnDemand"}}, {"no": 3, "medium": "Ammonia Solution", "formula": "NH4OH", "pct": "25", "sg": "0.91", "temp": "", "ex": "", "mat": {"PP": "OnDemand", "PVDF": "R", "Aluminium": "N", "Stainless Steel": "FPM-FEP", "Hastelloy C": "N", "PP (flow meter)": "R", "PVDF (flow meter)": "N", "PPS": "N", "Stainless Steel (flow meter)": "R", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "N", "Stainless/FPM": "R", "Aluminium/NBR": "R"}}, {"no": 4, "medium": "Citric Acid", "formula": "C6H8O7", "pct": "10", "sg": "", "temp": "", "ex": "", "mat": {"PP": "EPDM", "PVDF": "N", "Aluminium": "EPDM", "Stainless Steel": "N", "Hastelloy C": "OnDemand", "PP (flow meter)": "R", "PVDF (flow meter)": "OnDemand", "PPS": "N", "Stainless Steel (flow meter)": "R", "PP/FPM": "FPM-FEP", "PVDF/FPM": "N", "Brass/PTFE": "R", "Stainless/FPM": "FPM-FEP", "Aluminium/NBR": "EPDM"}}, {"no": 5, "medium": "Citric Acid", "formula": "C6H8O7", "pct": "sat.", "sg": "", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "N", "Aluminium": "R", "Stainless Steel": "FPM-FEP", "Hastelloy C": "N", "PP (flow meter)": "OnDemand", "PVDF (flow meter)": "R", "PPS": "EPDM", "Stainless Steel (flow meter)": "R", "PP/FPM": "N", "PVDF/FPM": "FPM-FEP", "Brass/PTFE": "R", "Stainless/FPM": "R", "Aluminium/NBR": "R"}}, {"no": 6, "medium": "Ethanol", "formula": "C2H5OH", "pct": "96", "sg": "0.81", "temp": "T2", "ex": "Ex", "mat": {"PP": "N", "PVDF": "R", "Aluminium": "N", "Stainless Steel": "OnDemand", "Hastelloy C": "R", "PP (flow meter)": "N", "PVDF (flow meter)": "EPDM", "PPS": "R", "Stainless Steel (flow meter)": "R", "PP/FPM": "EPDM", "PVDF/FPM": "N", "Brass/PTFE": "R", "Stainless/FPM": "R", "Aluminium/NBR": "R"}}, {"no": 7, "medium": "Hydrochloric Acid", "formula": "HCl", "pct": "10", "sg": "", "temp": "", "ex": "", "mat": {"PP": "EPDM", "PVDF": "N", "Aluminium": "R", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "R", "PVDF (flow meter)": "FPM-FEP", "PPS": "FPM-FEP", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "R", "PVDF/FPM": "OnDemand", "Brass/PTFE": "FPM-FEP", "Stainless/FPM": "N", "Aluminium/NBR": "R"}}, {"no": 8, "medium": "Hydrochloric Acid", "formula": "HCl", "pct": "30", "sg": "1.15", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "EPDM", "Aluminium": "N", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "R", "Stainless Steel (flow meter)": "R", "PP/FPM": "R", "PVDF/FPM": "FPM-FEP", "Brass/PTFE": "R", "Stainless/FPM": "N", "Aluminium/NBR": "OnDemand"}}, {"no": 9, "medium": "Hydrochloric Acid", "formula": "HCl", "pct": "37", "sg": "1.19", "temp": "", "ex": "", "mat": {"PP": "FPM-FEP", "PVDF": "EPDM", "Aluminium": "R", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "FPM-FEP", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "N", "PVDF/FPM": "R", "Brass/PTFE": "R", "Stainless/FPM": "OnDemand", "Aluminium/NBR": "R"}}, {"no": 10, "medium": "Hydrogen Peroxide", "formula": "H2O2", "pct": "30", "sg": "1.11", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "N", "Aluminium": "R", "Stainless Steel": "R", "Hastelloy C": "EPDM", "PP (flow meter)": "FPM-FEP", "PVDF (flow meter)": "N", "PPS": "EPDM", "Stainless Steel (flow meter)": "R", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "FPM-FEP", "Stainless/FPM": "R", "Aluminium/NBR": "N"}}, {"no": 11, "medium": "Hydrogen Peroxide", "formula": "H2O2", "pct": "50", "sg": "1.19", "temp": "", "ex": "", "mat": {"PP": "EPDM", "PVDF": "R", "Aluminium": "OnDemand", "Stainless Steel": "FPM-FEP", "Hastelloy C": "N", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "N", "Stainless Steel (flow meter)": "R", "PP/FPM": "N", "PVDF/FPM": "R", "Brass/PTFE": "R", "Stainless/FPM": "N", "Aluminium/NBR": "OnDemand"}}, {"no": 12, "medium": "Isopropanol", "formula": "C3H8O", "pct": "100", "sg": "0.79", "temp": "T2", "ex": "Ex", "mat": {"PP": "R", "PVDF": "OnDemand", "Aluminium": "R", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "FPM-FEP", "PVDF (flow meter)": "R", "PPS": "N", "Stainless Steel (flow meter)": "OnDemand", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "R", "Stainless/FPM": "FPM-FEP", "Aluminium/NBR": "EPDM"}}, {"no": 13, "medium": "Methanol", "formula": "CH3OH", "pct": "100", "sg": "0.79", "temp": "T1", "ex": "Ex", "mat": {"PP": "FPM-FEP", "PVDF": "FPM-FEP", "Aluminium": "EPDM", "Stainless Steel": "R", "Hastelloy C": "EPDM", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "R", "Stainless Steel (flow meter)": "N", "PP/FPM": "N", "PVDF/FPM": "R", "Brass/PTFE": "FPM-FEP", "Stainless/FPM": "N", "Aluminium/NBR": "FPM-FEP"}}, {"no": 14, "medium": "Motor Oil", "formula": "-", "pct": "pure", "sg": "0.88", "temp": "", "ex": "", "mat": {"PP": "N", "PVDF": "N", "Aluminium": "N", "Stainless Steel": "FPM-FEP", "Hastelloy C": "R", "PP (flow meter)": "N", "PVDF (flow meter)": "FPM-FEP", "PPS": "FPM-FEP", "Stainless Steel (flow meter)": "OnDemand", "PP/FPM": "N", "PVDF/FPM": "R", "Brass/PTFE": "N", "Stainless/FPM": "N", "Aluminium/NBR": "R"}}, {"no": 15, "medium": "Nitric Acid", "formula": "HNO3", "pct": "10", "sg": "", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "R", "Aluminium": "EPDM", "Stainless Steel": "N", "Hastelloy C": "OnDemand", "PP (flow meter)": "R", "PVDF (flow meter)": "EPDM", "PPS": "FPM-FEP", "Stainless Steel (flow meter)": "N", "PP/FPM": "EPDM", "PVDF/FPM": "N", "Brass/PTFE": "R", "Stainless/FPM": "N", "Aluminium/NBR": "R"}}, {"no": 16, "medium": "Nitric Acid", "formula": "HNO3", "pct": "30", "sg": "", "temp": "", "ex": "", "mat": {"PP": "OnDemand", "PVDF": "N", "Aluminium": "R", "Stainless Steel": "N", "Hastelloy C": "N", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "R", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "N", "PVDF/FPM": "N", "Brass/PTFE": "N", "Stainless/FPM": "R", "Aluminium/NBR": "OnDemand"}}, {"no": 17, "medium": "Nitric Acid", "formula": "HNO3", "pct": "65", "sg": "1.4", "temp": "", "ex": "", "mat": {"PP": "N", "PVDF": "OnDemand", "Aluminium": "R", "Stainless Steel": "N", "Hastelloy C": "FPM-FEP", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "OnDemand", "Stainless Steel (flow meter)": "R", "PP/FPM": "R", "PVDF/FPM": "N", "Brass/PTFE": "OnDemand", "Stainless/FPM": "OnDemand", "Aluminium/NBR": "R"}}, {"no": 18, "medium": "Phosphoric Acid", "formula": "H3PO4", "pct": "25", "sg": "", "temp": "", "ex": "", "mat": {"PP": "FPM-FEP", "PVDF": "N", "Aluminium": "FPM-FEP", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "EPDM", "PVDF (flow meter)": "R", "PPS": "N", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "R", "PVDF/FPM": "OnDemand", "Brass/PTFE": "R", "Stainless/FPM": "R", "Aluminium/NBR": "FPM-FEP"}}, {"no": 19, "medium": "Phosphoric Acid", "formula": "H3PO4", "pct": "85", "sg": "1.69", "temp": "", "ex": "", "mat": {"PP": "N", "PVDF": "EPDM", "Aluminium": "N", "Stainless Steel": "R", "Hastelloy C": "N", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "R", "Stainless Steel (flow meter)": "N", "PP/FPM": "N", "PVDF/FPM": "N", "Brass/PTFE": "N", "Stainless/FPM": "R", "Aluminium/NBR": "EPDM"}}, {"no": 20, "medium": "Potassium Hydroxide", "formula": "KOH", "pct": "10", "sg": "", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "EPDM", "Aluminium": "R", "Stainless Steel": "N", "Hastelloy C": "R", "PP (flow meter)": "N", "PVDF (flow meter)": "R", "PPS": "EPDM", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "N", "PVDF/FPM": "OnDemand", "Brass/PTFE": "R", "Stainless/FPM": "OnDemand", "Aluminium/NBR": "N"}}, {"no": 21, "medium": "Potassium Hydroxide", "formula": "KOH", "pct": "50", "sg": "1.51", "temp": "", "ex": "", "mat": {"PP": "EPDM", "PVDF": "R", "Aluminium": "OnDemand", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "FPM-FEP", "PVDF (flow meter)": "N", "PPS": "EPDM", "Stainless Steel (flow meter)": "N", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "OnDemand", "Stainless/FPM": "N", "Aluminium/NBR": "EPDM"}}, {"no": 22, "medium": "Sodium Hypochlorite", "formula": "NaOCl", "pct": "12.5", "sg": "", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "R", "Aluminium": "N", "Stainless Steel": "EPDM", "Hastelloy C": "N", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "R", "Stainless Steel (flow meter)": "R", "PP/FPM": "R", "PVDF/FPM": "FPM-FEP", "Brass/PTFE": "N", "Stainless/FPM": "R", "Aluminium/NBR": "N"}}, {"no": 23, "medium": "Sulfuric Acid", "formula": "H2SO4", "pct": "10", "sg": "", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "R", "Aluminium": "R", "Stainless Steel": "R", "Hastelloy C": "FPM-FEP", "PP (flow meter)": "N", "PVDF (flow meter)": "N", "PPS": "R", "Stainless Steel (flow meter)": "OnDemand", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "EPDM", "Stainless/FPM": "R", "Aluminium/NBR": "FPM-FEP"}}, {"no": 24, "medium": "Sulfuric Acid", "formula": "H2SO4", "pct": "50", "sg": "1.4", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "R", "Aluminium": "FPM-FEP", "Stainless Steel": "N", "Hastelloy C": "R", "PP (flow meter)": "N", "PVDF (flow meter)": "R", "PPS": "OnDemand", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "EPDM", "Stainless/FPM": "R", "Aluminium/NBR": "R"}}, {"no": 25, "medium": "Sulfuric Acid", "formula": "H2SO4", "pct": "96", "sg": "1.84", "temp": "", "ex": "", "mat": {"PP": "N", "PVDF": "FPM-FEP", "Aluminium": "FPM-FEP", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "R", "PVDF (flow meter)": "R", "PPS": "N", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "EPDM", "Stainless/FPM": "N", "Aluminium/NBR": "N"}}, {"no": 26, "medium": "Toluene", "formula": "C6H5CH3", "pct": "100", "sg": "0.87", "temp": "T2", "ex": "Ex", "mat": {"PP": "R", "PVDF": "N", "Aluminium": "OnDemand", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "FPM-FEP", "PVDF (flow meter)": "EPDM", "PPS": "R", "Stainless Steel (flow meter)": "R", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "N", "Stainless/FPM": "R", "Aluminium/NBR": "N"}}, {"no": 27, "medium": "Vinegar (Acetic Acid)", "formula": "CH3COOH", "pct": "10", "sg": "", "temp": "", "ex": "", "mat": {"PP": "N", "PVDF": "EPDM", "Aluminium": "R", "Stainless Steel": "R", "Hastelloy C": "R", "PP (flow meter)": "R", "PVDF (flow meter)": "FPM-FEP", "PPS": "R", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "N", "PVDF/FPM": "N", "Brass/PTFE": "OnDemand", "Stainless/FPM": "OnDemand", "Aluminium/NBR": "R"}}, {"no": 28, "medium": "Vinegar (Acetic Acid)", "formula": "CH3COOH", "pct": "80", "sg": "", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "R", "Aluminium": "R", "Stainless Steel": "N", "Hastelloy C": "R", "PP (flow meter)": "N", "PVDF (flow meter)": "R", "PPS": "N", "Stainless Steel (flow meter)": "R", "PP/FPM": "OnDemand", "PVDF/FPM": "R", "Brass/PTFE": "R", "Stainless/FPM": "N", "Aluminium/NBR": "FPM-FEP"}}, {"no": 29, "medium": "Water, Demineralized", "formula": "H2O", "pct": "100", "sg": "1.0", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "OnDemand", "Aluminium": "R", "Stainless Steel": "N", "Hastelloy C": "R", "PP (flow meter)": "FPM-FEP", "PVDF (flow meter)": "R", "PPS": "OnDemand", "Stainless Steel (flow meter)": "OnDemand", "PP/FPM": "FPM-FEP", "PVDF/FPM": "R", "Brass/PTFE": "R", "Stainless/FPM": "R", "Aluminium/NBR": "EPDM"}}, {"no": 30, "medium": "Xylene", "formula": "C6H4(CH3)2", "pct": "100", "sg": "0.86", "temp": "T1", "ex": "Ex", "mat": {"PP": "OnDemand", "PVDF": "EPDM", "Aluminium": "R", "Stainless Steel": "EPDM", "Hastelloy C": "N", "PP (flow meter)": "FPM-FEP", "PVDF (flow meter)": "N", "PPS": "EPDM", "Stainless Steel (flow meter)": "OnDemand", "PP/FPM": "R", "PVDF/FPM": "N", "Brass/PTFE": "EPDM", "Stainless/FPM": "EPDM", "Aluminium/NBR": "R"}}, {"no": 31, "medium": "Glycerin", "formula": "C3H8O3", "pct": "pure", "sg": "1.26", "temp": "", "ex": "", "mat": {"PP": "R", "PVDF": "EPDM", "Aluminium": "R", "Stainless Steel": "EPDM", "Hastelloy C": "N", "PP (flow meter)": "N", "PVDF (flow meter)": "R", "PPS": "N", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "R", "PVDF/FPM": "FPM-FEP", "Brass/PTFE": "R", "Stainless/FPM": "R", "Aluminium/NBR": "N"}}, {"no": 32, "medium": "Diesel Fuel", "formula": "-", "pct": "100", "sg": "0.84", "temp": "T2", "ex": "", "mat": {"PP": "R", "PVDF": "FPM-FEP", "Aluminium": "EPDM", "Stainless Steel": "R", "Hastelloy C": "FPM-FEP", "PP (flow meter)": "R", "PVDF (flow meter)": "N", "PPS": "R", "Stainless Steel (flow meter)": "EPDM", "PP/FPM": "R", "PVDF/FPM": "R", "Brass/PTFE": "FPM-FEP", "Stainless/FPM": "R", "Aluminium/NBR": "R"}}];
+
+const GROUPS = [
+  {
+    title: "Pump Tubes",
+    desc: "Drum pump tube material — choice depends on medium and concentration",
+    cols: ["PP", "PVDF", "Aluminium", "Stainless Steel", "Hastelloy C"]
+  },
+  {
+    title: "Flow Meters",
+    desc: "Flow meter housing material",
+    cols: ["PP (flow meter)", "PVDF (flow meter)", "PPS", "Stainless Steel (flow meter)"]
+  },
+  {
+    title: "Nozzles",
+    desc: "Dispensing nozzle housing and seal material",
+    cols: ["PP/FPM", "PVDF/FPM", "Brass/PTFE", "Stainless/FPM", "Aluminium/NBR"]
+  }
+];
+
+const STATUS_INFO = {
+  "R": {cls:"st-R", label:"R — Resistant"},
+  "N": {cls:"st-N", label:"N — Not resistant"},
+  "EPDM": {cls:"st-EPDM", label:"Resistant (EPDM seal)"},
+  "FPM-FEP": {cls:"st-FPMFEP", label:"Resistant (FPM-FEP seal)"},
+  "OnDemand": {cls:"st-OnDemand", label:"On request"},
+  "NitricChamber": {cls:"st-Special", label:"Special version required"},
+  "Rulon": {cls:"st-Special", label:"Special seal required"},
+  "": {cls:"st-empty", label:"No data"}
+};
+
+
+// Build unique medium index (grouped by medium name)
+const mediumIndex = {};
+DATA.forEach(row => {
+  if(!mediumIndex[row.medium]) mediumIndex[row.medium] = [];
+  mediumIndex[row.medium].push(row);
+});
+const mediumNames = Object.keys(mediumIndex).sort((a,b)=>a.localeCompare(b));
+
+const input = document.getElementById('mediumInput');
+const suggestionsEl = document.getElementById('suggestions');
+const variantPanel = document.getElementById('variantPanel');
+const variantGrid = document.getElementById('variantGrid');
+const variantCount = document.getElementById('variantCount');
+const resultsSection = document.getElementById('resultsSection');
+const resultsGroups = document.getElementById('resultsGroups');
+const emptyState = document.getElementById('emptyState');
+
+let activeSuggestionIndex = -1;
+
+function renderSuggestions(query){
+  const q = query.trim().toLowerCase();
+  let matches;
+  let truncated = false;
+
+  if(q.length === 0){
+    // Empty field: show the full alphabetical list as a browsable dropdown
+    matches = mediumNames.slice(0, 60);
+    truncated = mediumNames.length > 60;
+  } else {
+    matches = mediumNames.filter(name => {
+      const rows = mediumIndex[name];
+      const formula = rows[0].formula.toLowerCase();
+      return name.toLowerCase().includes(q) || formula.includes(q);
+    }).slice(0, 30);
+  }
+
+  if(matches.length === 0){
+    suggestionsEl.innerHTML = '<li style="cursor:default;color:#8a8371;">No matches</li>';
+    suggestionsEl.classList.add('open');
+    return;
+  }
+
+  suggestionsEl.innerHTML = matches.map((name,i) => {
+    const formula = mediumIndex[name][0].formula;
+    return `<li data-name="${escapeHtml(name)}" data-idx="${i}">${escapeHtml(name)}${formula ? `<span class="formula">${escapeHtml(formula)}</span>` : ''}</li>`;
+  }).join('') + (truncated ? `<li style="cursor:default;color:#8a8371;font-style:italic;">… keep typing to filter (${mediumNames.length} chemicals total)</li>` : '');
+  suggestionsEl.classList.add('open');
+  activeSuggestionIndex = -1;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+input.addEventListener('input', () => renderSuggestions(input.value));
+input.addEventListener('focus', () => renderSuggestions(input.value));
+input.addEventListener('click', () => renderSuggestions(input.value));
+document.addEventListener('click', (e) => {
+  if(!document.getElementById('mediumList').contains(e.target)){
+    suggestionsEl.classList.remove('open');
+  }
+});
+
+input.addEventListener('keydown', (e) => {
+  const items = suggestionsEl.querySelectorAll('li[data-name]');
+  if(!items.length) return;
+  if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    activeSuggestionIndex = Math.min(activeSuggestionIndex+1, items.length-1);
+    updateActive(items);
+  } else if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    activeSuggestionIndex = Math.max(activeSuggestionIndex-1, 0);
+    updateActive(items);
+  } else if(e.key === 'Enter'){
+    e.preventDefault();
+    if(activeSuggestionIndex >= 0 && items[activeSuggestionIndex]){
+      selectMedium(items[activeSuggestionIndex].dataset.name);
+    } else if(items.length === 1){
+      selectMedium(items[0].dataset.name);
+    }
+  } else if(e.key === 'Escape'){
+    suggestionsEl.classList.remove('open');
+  }
+});
+
+function updateActive(items){
+  items.forEach(li => li.classList.remove('active'));
+  if(items[activeSuggestionIndex]){
+    items[activeSuggestionIndex].classList.add('active');
+    items[activeSuggestionIndex].scrollIntoView({block:'nearest'});
+  }
+}
+
+suggestionsEl.addEventListener('click', (e) => {
+  const li = e.target.closest('li[data-name]');
+  if(li) selectMedium(li.dataset.name);
+});
+
+let currentMedium = null;
+let currentVariant = null;
+
+function selectMedium(name){
+  currentMedium = name;
+  input.value = name;
+  suggestionsEl.classList.remove('open');
+  emptyState.style.display = 'none';
+
+  const rows = mediumIndex[name];
+  variantCount.textContent = `(${rows.length} Eintrag${rows.length>1?'e':''})`;
+
+  if(rows.length === 1){
+    variantPanel.style.display = 'none';
+    selectVariant(rows[0]);
+  } else {
+    variantPanel.style.display = 'block';
+    variantGrid.innerHTML = rows.map((r,i) => variantCardHtml(r,i)).join('');
+    variantGrid.querySelectorAll('.variant-card').forEach((card,i) => {
+      card.addEventListener('click', () => {
+        variantGrid.querySelectorAll('.variant-card').forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectVariant(rows[i]);
+      });
+    });
+    resultsSection.style.display = 'none';
+  }
+}
+
+function variantCardHtml(r, i){
+  const parts = [];
+  if(r.pct) parts.push(`<span>${escapeHtml(r.pct)}${/^[\d.]+$/.test(r.pct) ? '%' : ''}</span>`);
+  if(r.sg) parts.push(`<span>ρ ${escapeHtml(r.sg)}</span>`);
+  if(r.temp) parts.push(`<span>${escapeHtml(r.temp)}</span>`);
+  if(r.ex) parts.push(`<span class="ex-tag">${escapeHtml(r.ex)}</span>`);
+  return `<div class="variant-card" data-i="${i}">
+    <div class="vc-title">${escapeHtml(r.medium)}</div>
+    <div class="vc-meta">${parts.length ? parts.join('') : '<span>keine weiteren Angaben</span>'}</div>
+  </div>`;
+}
+
+function selectVariant(row){
+  currentVariant = row;
+  resultsSection.style.display = 'block';
+  renderResults(row);
+  resultsSection.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function renderResults(row){
+  resultsGroups.innerHTML = GROUPS.map(group => {
+    const cards = group.cols.map(col => {
+      const val = row.mat[col] || "";
+      const info = STATUS_INFO[val] || STATUS_INFO[""];
+      let note = "";
+      if(val === "OnDemand"){
+        note = "Check with the manufacturer before ordering.";
+      } else if(val === "NitricChamber"){
+        note = "Requires a special chamber design.";
+      } else if(val === "Rulon"){
+        note = "Requires a Rulon-type seal.";
+      } else if(val === "EPDM"){
+        note = "Seal material: use EPDM.";
+      } else if(val === "FPM-FEP"){
+        note = "Seal material: use FPM-FEP.";
+      }
+      return `<div class="mat-card ${info.cls}">
+        <div class="mc-name">${escapeHtml(col)}</div>
+        <div class="mc-status">${escapeHtml(info.label)}</div>
+        ${note ? `<div class="mc-note">${escapeHtml(note)}</div>` : ''}
+      </div>`;
+    }).join('');
+
+    return `<div class="group">
+      <h3>${group.title}</h3>
+      <p class="group-desc">${group.desc}</p>
+      <div class="mat-grid">${cards}</div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
